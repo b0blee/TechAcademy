@@ -9,7 +9,7 @@ require 'b0b.rb'
 require 'drums110.rb'
 require 'tempo.rb'
 
-class DoPhing < MIDI
+class DoThing < MIDI
   include BohlenPierceJI
   include The_b0b
   include Drums110
@@ -69,7 +69,7 @@ class DoPhing < MIDI
     sleep( brnd ? @t.w/147.0 : @t.w/127.0 )
   end
 
-  def phing(its)
+  def thing(its)
     @its = its
     piano = Thread.new {
       sleep( @t.w / 12.0 )
@@ -104,18 +104,18 @@ class DoPhing < MIDI
 
   def perform(tempo)
     @t = Tempo.new(tempo)
-    phing 36
+    thing 36
     @t = Tempo.new(tempo * 1.25)
-    phing 72
+    thing 72
     @t = Tempo.new(tempo)
-    phing 24
+    thing 24
     @t = Tempo.new(tempo * 4.0 / 3.0)
-    phing 96
+    thing 96
     @t = Tempo.new(tempo * 2.0 / 3.0)
-    phing 12
-    phing 1
+    thing 12
+    thing 1
   end
 end
 
-go = DoPhing.new
+go = DoThing.new
 go.perform(199)
