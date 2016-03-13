@@ -24,18 +24,22 @@ class DoThing < MIDI
 
   Pitches = Chromatic
 
+  def hesitate
+    sleep( brnd ? @t.w/147.0 : @t.w/127.0)
+  end
+
   def hesitated?
     if brnd
       return false  # half the time we do nothing
     end
-    sleep( brnd ? @t.w/147.0 : @t.w/127.0 )
+    hesitate
     return true
   end
 
   # bottom is the index of the lowest note allowed in the Pitches array
   def whaXen(bottom, range, vol, channel)
     playXen(Pitches[bottom], vol.volume, @t.w, channel)
-    sleep( brnd ? @t.w/147.0 : @t.w/127.0 )
+    hesitate
     (3..@its+3).each do |i|
       hesitated?
       r = rand(range)
@@ -52,16 +56,16 @@ class DoThing < MIDI
       end
     end
     playXen(Pitches[bottom], vol.volume, @t.w, channel)
-    sleep( brnd ? @t.w/147.0 : @t.w/127.0 )
+    hesitate
   end
 
   def whaDrums(bottom, vol)
     playMidi(bottom, vol.volume, @t.w, DrumChannel, true)
-    sleep( brnd ? @t.w/147.0 : @t.w/127.0 )
+    hesitate
     limit = @its + 3
     (3..@its+3).each do |i|
       hesitated?
-      n = AllDrums[ rand( AllDrums.size ) ]
+      n = AllDrums[ rand( AllDrums.size) ]
       if n == BD1 || n == HC || n == CHIL
         next # avoiding bass drum 1, hand claps & chinese cymbal
       else
@@ -71,37 +75,37 @@ class DoThing < MIDI
       end
     end
     playMidi(bottom, vol.volume, @t.w, DrumChannel, true)
-    sleep( brnd ? @t.w/147.0 : @t.w/127.0 )
+    hesitate
   end
 
   def thing(its)
     @its = its
     piano1 = Thread.new {
       sleep( @t.w / 12.0 )
-      whaXen( 23, 39, Volume.new( 0, 75 ), PianoChannel1)
+      whaXen( 23, 39, Volume.new( 0, 50), PianoChannel1)
     }
     piano2 = Thread.new {
       sleep( @t.w * 3.0 / 16.0 )
-      whaXen( 26, 39, Volume.new( 0, 75 ), PianoChannel2)
+      whaXen( 26, 39, Volume.new( 0, 50), PianoChannel2)
     }
     bass = Thread.new {
-      whaXen( 13, 26, Volume.new( 20, 100 ), BassChannel)
+      whaXen( 13, 26, Volume.new( 20, 100), BassChannel)
     }
     vibes1 = Thread.new {
       sleep @t.s
-      whaXen( 26, 13, Volume.new( 0, 40 ), VibesChannel1)
+      whaXen( 26, 13, Volume.new( 0, 50), VibesChannel1)
     }
     vibes2 = Thread.new {
       sleep( @t.dot @t.e )
-      whaXen( 32, 13, Volume.new( 0, 60 ), VibesChannel2)
+      whaXen( 32, 13, Volume.new( 0, 50), VibesChannel2)
     }
     drums = Thread.new {
       sleep @t.e
-      whaDrums( BD2, Volume.new( 40, 90 ) )
+      whaDrums( BD2, Volume.new( 40, 90))
     }
 
     sleep @t.w * 5.0 / 32.0
-    whaDrums( SD1, Volume.new( 20, 80 ) )
+    whaDrums( SD1, Volume.new( 20, 80))
 
     while piano1.alive? or piano2.alive? or bass.alive? \
       or vibes1.alive? or vibes2.alive? or drums.alive?
