@@ -12,9 +12,14 @@ class MIDI
     @synth = UniMIDI::Output.open(:first)
   end
 
-  NOTE_ON = 0x90
+  # MIDI channel messages
   NOTE_OFF = 0x80
-  BEND = 0xE0
+  NOTE_ON = 0x90
+  POLY_KEY_PRESSURE = 0xA0
+  CONTROL_CHAGE = 0xB0
+  PROGRAM_CHANGE = 0xC0
+  CHANNEL_PRESSURE = 0xD0
+  PITCH_BEND = 0xE0
 
   def noteOn(channel, midiNote, velocity)
     @synth.puts(NOTE_ON | channel, midiNote, velocity)
@@ -22,6 +27,10 @@ class MIDI
 
   def noteOff(channel, midiNote)
     @synth.puts(NOTE_OFF | channel, midiNote, 0x00)
+  end
+
+  def voice(channel, instrument)
+    @synth.puts(PROGRAM_CHANGE | channel, instrument)
   end
 
   # if suspend is true, the current thread will sleep for the duration.
@@ -38,7 +47,7 @@ class MIDI
   end
 
   def bend(channel, msb, lsb=0x00)
-    @synth.puts(BEND | channel, lsb, msb)
+    @synth.puts(PITCH_BEND | channel, lsb, msb)
   end
 
   # Microtonals are usually monophonic in midi because bend effects entire channel.
@@ -51,7 +60,7 @@ class MIDI
 
   # play a regular MIDI note
   # If suspend is true (the default), this method sleeps for the duration
-  # If suspend is false, it spins a Thread for the NOTE_OFF, allowing polyphony  
+  # If suspend is false, it spins a Thread for the NOTE_OFF, allowing polyphony
   def playMidi(midiNote, velocity, duration, channel, suspend=true)
     noteOn(channel, midiNote, velocity)
     timedOff(channel, midiNote, duration, suspend)

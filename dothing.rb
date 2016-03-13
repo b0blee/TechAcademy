@@ -14,12 +14,13 @@ class DoThing < MIDI
   include The_b0b
   include Drums110
 
-  PianoChannel = 0
-  DrumChannel = 1
-  StringChannel = 2
-  BassChannel = 3
-  HornChannel = 4
-  ReedChannel = 5
+  # U-110 patch P-02:Academy_49
+  PianoChannel1 = 0
+  PianoChannel2 = 1
+  BassChannel = 2
+  VibesChannel1 = 3
+  VibesChannel2 = 4
+  DrumChannel = 9
 
   Pitches = Chromatic
 
@@ -34,6 +35,7 @@ class DoThing < MIDI
   # bottom is the index of the lowest note allowed in the Pitches array
   def whaXen(bottom, range, vol, channel)
     playXen(Pitches[bottom], vol.volume, @t.w, channel)
+    sleep( brnd ? @t.w/147.0 : @t.w/127.0 )
     (3..@its+3).each do |i|
       hesitated?
       r = rand(range)
@@ -55,6 +57,7 @@ class DoThing < MIDI
 
   def whaDrums(bottom, vol)
     playMidi(bottom, vol.volume, @t.w, DrumChannel, true)
+    sleep( brnd ? @t.w/147.0 : @t.w/127.0 )
     limit = @its + 3
     (3..@its+3).each do |i|
       hesitated?
@@ -62,7 +65,9 @@ class DoThing < MIDI
       if n == BD1 || n == HC || n == CHIL
         next # avoiding bass drum 1, hand claps & chinese cymbal
       else
-        playMidi(n, vol.walk!, @t.q, DrumChannel, true)
+        # playMidi(n, vol.walk!, @t.q, DrumChannel, true)
+        noteOn(DrumChannel, n, vol.walk!)
+        sleep @t.q   # no note off in drums
       end
     end
     playMidi(bottom, vol.volume, @t.w, DrumChannel, true)
@@ -71,22 +76,24 @@ class DoThing < MIDI
 
   def thing(its)
     @its = its
-    piano = Thread.new {
+    piano1 = Thread.new {
       sleep( @t.w / 12.0 )
-      whaXen( 23, 39, Volume.new( 0, 75 ), PianoChannel)
+      whaXen( 23, 39, Volume.new( 0, 75 ), PianoChannel1)
     }
-    string = Thread.new {
+    piano2 = Thread.new {
       sleep( @t.w * 3.0 / 16.0 )
-      whaXen( 26, 39, Volume.new( 0, 75 ), StringChannel)
+      whaXen( 26, 39, Volume.new( 0, 75 ), PianoChannel2)
     }
     bass = Thread.new {
       whaXen( 13, 26, Volume.new( 20, 100 ), BassChannel)
     }
-    horn = Thread.new {
-      whaXen( 26, 13, Volume.new( 0, 40 ), HornChannel)
+    vibes1 = Thread.new {
+      sleep @t.s
+      whaXen( 26, 13, Volume.new( 0, 40 ), VibesChannel1)
     }
-    reed = Thread.new {
-      whaXen( 32, 13, Volume.new( 0, 60 ), ReedChannel)
+    vibes2 = Thread.new {
+      sleep( @t.dot @t.e )
+      whaXen( 32, 13, Volume.new( 0, 60 ), VibesChannel2)
     }
     drums = Thread.new {
       sleep @t.e
@@ -96,13 +103,21 @@ class DoThing < MIDI
     sleep @t.w * 5.0 / 32.0
     whaDrums( SD1, Volume.new( 20, 80 ) )
 
-    while piano.alive? or string.alive? or bass.alive? or horn.alive? or
-      reed.alive? or drums.alive?
+    while piano1.alive? or piano2.alive? or bass.alive? \
+      or vibes1.alive? or vibes2.alive? or drums.alive?
      sleep 0.25
     end
   end
 
   def perform(tempo)
+    # assign U-110 voices
+    voice( PianoChannel1, 8)  # a.piano.9
+    voice( PianoChannel2, 8)
+    voice( BassChannel, 50)   # ac.bass
+    voice( VibesChannel1, 17) # vib.3
+    voice( VibesChannel2, 17)
+    voice( DrumChannel, 98)   # drums
+
     @t = Tempo.new(tempo)
     thing 36
     @t = Tempo.new(tempo * 1.25)
@@ -118,4 +133,4 @@ class DoThing < MIDI
 end
 
 go = DoThing.new
-go.perform(199)
+go.perform(180)
