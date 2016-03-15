@@ -128,44 +128,55 @@ class In_odd
     Part37, Part38, Part39, Part40, Part41, Part42, Part43, Part44, Part45, \
     Part46, Part47, Part48, Part49, Part50, Part51, Part52, Part53 ]
 
-  def playScore(channel)
+  def playScore(channel, volume)
     Score.each do |part|
-      limit = 3.0 + rand(2)
+      limit = 5.0 + rand(3)
+      if part == Part35   # it's a very long part
+        limit *= 4.0;
+      end
       running = 0.0
       while running < limit do
         part.each do |note|
-          note.play( @tempo, 0x40, channel);
+          note.play( @tempo, volume::walk!, channel);
           running += note::duration
         end
       end
+    end
+    @done += 1
+    while @done < @players do
+      Part53.each do |note|
+        note.play( @tempo, volume::walk!, channel);
+      end
+
     end
   end
 
   def perform( bpm)
     @tempo = Tempo.new( bpm)
+    @players = 6
+    @done = 0
     t0 = Thread.new {
-      playScore(0)
+      playScore(0, Volume.new(44, 84))
     }
     t1 = Thread.new {
-      playScore(1)
+      playScore(1, Volume.new(44, 84))
     }
     t2 = Thread.new {
-      playScore(2)
+      playScore(2, Volume.new(44, 84))
     }
     t3 = Thread.new {
-      playScore(3)
+      playScore(3, Volume.new(48, 84))
     }
     t4 = Thread.new {
-      playScore(4)
+      playScore(4, Volume.new(48, 84))
     }
+    playScore(5, Volume.new(48, 84))
 
-    playScore(5)
-
-    while t0.alive? or t1.alive? or t2.alive? or t3.alive? or t4.alive?
+    while t0::alive? or t1::alive? or t2::alive? or t3::alive? or t4::alive?
      sleep 0.25
     end
   end
 end
 
 go = In_odd.new
-go.perform 100
+go.perform 97
