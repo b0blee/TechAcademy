@@ -7,8 +7,6 @@ $LOAD_PATH << './lib'
 require 'midi.rb'
 require 'bp_ji.rb'
 require 'volume.rb'
-require 'b0b.rb'
-require 'drums110.rb'
 require 'tempo.rb'
 
 Midi = MIDI.new
