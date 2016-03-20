@@ -16,14 +16,14 @@ class Volume
     # enforce bounds for instance variables
     @min = [minv, 0].max
     @max = [maxv, 127].min
+    @vstep = (@max - @min) / 4.0
     @volume = @min + rand(@max - @min).to_i
   end
 
   # Markov chain "drunkard's walk" changes @volume in small steps randomly
   def walk!
     if brnd
-      step = (@max - @min) / 4.0
-      x = (rand(step + 0.5) + 1.0).to_i
+      x = rand(@vstep).to_i
       @volume = brnd ? [@max, @volume + x].min : [@min, @volume - x].max
     else
       @volume
