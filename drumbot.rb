@@ -27,25 +27,68 @@ class Drumbot
   Snarehand = [ SD1, SD2 ]                # main snare drum
   Rotohand  = [ LTT3, MTT3, MTT3, HTT3, BD3 ] # rototoms
 
-  def hit(limb)
+  def hit(limb, velocity)
     drum = limb[rand(limb.size)]
-    Midi.noteOn(@channel, drum, @volume.walk!)
+    Midi.noteOn(@channel, drum, velocity)
     return drum
   end
 
-  def perform
-    10.times do
-        hit(Lfoot); sleep 0.25
-        hit(Clubfoot);  sleep 0.25
-        hit(Tomhand); sleep 0.25
-        hit(Ridehand); sleep 0.25
-        hit(Crashhand); sleep 0.25
-        hit(Snarehand); sleep 0.25
-        hit(Rotohand); sleep 0.25
-    end
+  def pound(limb, duration, air)
+    @drumming = true
+    Thread.new {
+      volume = Volume.new(0, 100)
+      while @drumming
+        if air && ((rand(air)/16) >= 1)
+          # TODO: pedal
+          sleep duration
+        else
+          hit( limb, volume.walk! )
+          sleep duration
+        end
+      end
+    }
+  end
+
+  def drumbot4
+    tempo = Tempo.new(125)
+    w, h, q = tempo.w, tempo.h, tempo.q
+    hit(Crashhand, 64)
+    sleep q
+    pound( Lfoot, q, false)
+    pound( Clubfoot, w * 128.0 / 129.0, false)
+    pound( Crashhand, w * 7.0 / 32.0, 180)
+    sleep q
+    pound( Snarehand, h, false)
+    pound( Snarehand, w * 64.0 / 129.0, false)
+    sleep q
+    sleep w * 8192 / 129
+    @drumming = false
+    hit(Crashhand, 64)
+    sleep w
+  end
+
+  def drumbot5
+    tempo = Tempo.new(125)
+    w, h, q, e = tempo.w, tempo.h, tempo.q, tempo.e
+    pound( Clubfoot, q, 22)
+    pound( Lfoot, w+q, false)
+    pound( Crashhand, w * 7.0 / 19.0, 200)
+    sleep h
+    pound( Snarehand, w + q, false)
+    pound( Snarehand, h + e, false)
+    sleep e
+    pound( Snarehand, e * 15.0, false)
+    pound( Lfoot, e * 8.0, false)
+    pound( Ridehand, e / 2.0, 22)
+    sleep( h + e )
+    pound( Snarehand, h + q, 0)
+    sleep w * 8192 / 129
+    @drumming = false
+    hit(Crashhand, 64)
   end
 
 end
 
 bot = Drumbot.new(9)
-bot.perform
+bot.drumbot4
+bot.drumbot5
