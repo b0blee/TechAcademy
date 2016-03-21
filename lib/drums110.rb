@@ -53,7 +53,7 @@ module Drums110
   SD5 = 87    # snare drum 5
   SD6 = 88    # snare drum 6
   LTT3 = 89   # low tom tom 3
-  CCH2 = 90   # closed high hat 2
+  CHH2 = 90   # closed high hat 2
   MTT3 = 91   # middle tom tom 3
   CHIH = 92   # chinese cymbal (high)
   HTT3 = 93   # high tom tom 3
