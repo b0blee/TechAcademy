@@ -26,52 +26,37 @@ class Drumbot
   Crashhand = [ CCH, CCL ]                # some crash cymbals
   Snarehand = [ SD1, SD2 ]                # main snare drum
   Rotohand  = [ LTT3, MTT3, MTT3, HTT3, BD3 ] # rototoms
-
-  def hit(limb, velocity)
-    drum = limb[rand(limb.size)]
-    Midi.noteOn(@channel, drum, velocity)
-    return drum
-  end
+  Hihathand = [ OHH1, CHH1, OHH2, CHH2 ]
 
   def brnd
     rand(0) < 0.5
   end
 
-  def pound(limb, duration, air)
+  def pound(limb, duration, air, channel=9)
     @drumming = true
     Thread.new {
-      volume = Volume.new(0, 100)
-      drum = false
+      volume = Volume.new( 0, 100 )
+      drum = nil
       while @drumming
         if air && (( rand( air + 1 ) / 16 ) >= 1 )
           if drum && brnd
-            Midi.noteOff(@channel, drum)
-            drum = false
+            Midi.noteOff( channel, drum )
+            drum = nil
+          # else # do nothing - drum may continue to sound
           end
         else
           if drum
-            Midi.noteOff(@channel, drum)
-            drum = false
+            Midi.noteOff( channel, drum )
+            drum = nil
           end
-          drum = hit( limb, volume.walk! )
+          drum = limb[rand(limb.size)]
+          Midi.noteOn( channel, drum, volume.walk! )
         end
         sleep duration
       end
     }
   end
-
-  def drumbot4
-    w, h, q = @tempo.w, @tempo.h, @tempo.q
-    hit(Crashhand, 64)
-    sleep q
-    pound( Lfoot, q, false)
-    pound( Clubfoot, w * 128.0 / 129.0, false)
-    pound( Crashhand, w * 7.0 / 32.0, 180)
-    sleep q
-    pound( Snarehand, h, false)
-    pound( Snarehand, w * 64.0 / 129.0, false)
-  end
-
+=begin original is obsolete
   def drumbot5
     w, h, q, e = @tempo.w, @tempo.h, @tempo.q, @tempo.e
     pound( Clubfoot, q, 22)
@@ -87,25 +72,21 @@ class Drumbot
     sleep( h + e )
     pound( Snarehand, h + q, 0)
   end
-
-  def drumdub
-    drumbot5
-    drumbot5
-    sleep (@tempo.q * 5) * 30
-    @drumming = false
-    hit(Crashhand, 64)
-  end
-
+=end
   # After listening to the above, I don't think that the archival Forth code
   # is what was actually recorded as Drum Dub in 1990.
   # A new 5/4 drumbot jam follows
 
+  def w; @tempo.w; end  # time of whole note
+  def h; @tempo.h; end  # time of half note
+  def q; @tempo.q; end  # time of quarter note
+  def e; @tempo.e; end  # time of eighth note
+
   def jam
-    w, h, q, e = @tempo.w, @tempo.h, @tempo.q, @tempo.e   # conveniences
     pound( Clubfoot, h + e, 30 )
-    pound( Lfoot, w + q, 30 )
     pound( Crashhand, q * 5.0, 150 )
-    pound( Ridehand, h / 3.0, 30 )
+    pound( Ridehand, h / 3.0, 60 )
+    pound( Hihathand, e, 20 )
     sleep( h )
     pound( Snarehand, w + q, 30 )
     pound( Snarehand, h + e, 30 )
@@ -113,17 +94,36 @@ class Drumbot
     sleep( e )
     pound( brnd ? Tomhand : Rotohand, q, 100 )
     pound( Crashhand, q * 5.0, 150 )
+    sleep( h )
+    pound( Lfoot, w + q, 30 )
+  end
+
+  # limbs using SN-U110-10 rock drums card
+  Rfoot2 = [ R_BD3, R_BD3 ]
+  Lfoot2 = [ R_BD4, R_BD4 ]
+  Rhand2 = [ R_RS, R_SD4, R_SD4, R_LT3, R_MT3, R_HT3, R_CH1, R_CH1, R_OH1 ]
+  Lhand2 = [ R_SD4, R_SD4, R_LT3, R_MT3, R_HT3, R_HOH1, R_CC3 ]
+  Whack = [ R_SD4, R_SD4 ]
+
+  def rock # in 5/4 time
+    pound( Rfoot2, q, nil, 0 )
+    pound( Rhand2, e, 20, 0 )
+    sleep( h )
+    pound( Whack, w + q, nil, 0 )
+    pound( Lfoot2, h, 40, 0 )
     sleep( e )
+    pound( Rhand2, h + e, nil, 0 )
   end
 
   def jams
-    hit(Crashhand, 64)
-    jam; jam;
-    sleep @tempo.q * 5 * 30   # 30 measures
+    Midi.noteOn( @channel, CCH, 64)
+    rock; jam;
+    sleep q * 5 * 30   # 30 measures
     @drumming = false
-    hit(Crashhand, 64)
+    Midi.noteOn( @channel, CCH, 64)
+    sleep q * 5
   end
 end
 
-bot = Drumbot.new(125,9)
+bot = Drumbot.new(140,9)
 bot.jams
