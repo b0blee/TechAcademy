@@ -126,12 +126,22 @@ class In_odd
     Part37, Part38, Part39, Part40, Part41, Part42, Part43, Part44, Part45, \
     Part46, Part47, Part48, Part49, Part50, Part51, Part52, Part53 ]
 
+  Lengths = [    # generated with self.analyze method (below)
+    0.75, 0.5, 0.5, 0.5, 0.5, 2.0, 2.0, 3.5, 1.0, 0.125,
+    0.375, 1.5, 1.5, 4.0, 1.0, 0.25, 0.34375, 0.5, 0.75, 0.75,
+    0.75, 3.125, 2.875, 2.625, 2.625, 2.375, 0.75, 0.5, 2.25, 1.5,
+    0.375, 1.5, 0.25, 0.125, 8.0, 0.375, 0.125, 0.1875, 0.375, 0.125,
+    0.125, 4.0, 0.75, 0.75, 0.75, 1.25, 0.25, 3.75, 0.375, 0.125,
+    0.1875, 0.125, 0.125 ]
+
   def playScore(channel, volume)
+    i = 0
     Score.each do |part|
-      limit = 5.0 + rand(3)
-      if part == Part35   # it's a very long part
-        limit *= 4.0;
-      end
+      length = Lengths[ i ]
+      i += 1
+      # play for at least 5.0 "measures", and at least 4 times
+      limit = (length > 1.25) ? 4.0 * length : 5.0
+      limit += rand( limit * 0.6 )  # extend it
       running = 0.0
       while running < limit do
         part.each do |note|
@@ -145,7 +155,6 @@ class In_odd
       Part53.each do |note|
         note.play( @tempo, volume::walk!, channel);
       end
-
     end
   end
 
@@ -179,7 +188,21 @@ class In_odd
       sleep 0.25
     end
   end
+
+  def self.analyze
+    index = 0
+    Score.each do |part|
+      index += 1; length = 0.0
+      part.each do |note|
+        length += note.duration
+      end
+      print length, ", "
+      if index % 10 == 0 then print "\n"; end
+    end
+    print "\n"
+  end
 end
 
+# In_odd.analyze
 go = In_odd.new
 go.perform 97
