@@ -149,29 +149,34 @@ class In_odd
     end
   end
 
+  def player( channel )
+    Thread.new {
+      playScore(channel, Volume.new(44, 84))
+    }
+  end
+
   def perform( bpm)
     @tempo = Tempo.new( bpm)
-    @players = 6
+    @players = 12
     @done = 0
-    t0 = Thread.new {
-      playScore(0, Volume.new(44, 84))
-    }
-    t1 = Thread.new {
-      playScore(1, Volume.new(44, 84))
-    }
-    t2 = Thread.new {
-      playScore(2, Volume.new(44, 84))
-    }
-    t3 = Thread.new {
-      playScore(3, Volume.new(48, 84))
-    }
-    t4 = Thread.new {
-      playScore(4, Volume.new(48, 84))
-    }
-    playScore(5, Volume.new(48, 84))
+    t0 = player(0)
+    t1 = player(1)
+    t2 = player(2)
+    t3 = player(3)
+    t4 = player(4)
+    t5 = player(5)
+    t6 = player(6)
+    t7 = player(7)
+    t8 = player(8)
+    t9 = player(9)
+    t10 = player(10)
 
-    while t0::alive? or t1::alive? or t2::alive? or t3::alive? or t4::alive?
-     sleep 0.25
+    playScore(11, Volume.new(48, 84))
+
+    while t0::alive? or t1::alive? or t2::alive? or t3::alive? or t4::alive? \
+      or t5::alive? or t6::alive? or t7::alive? or t8::alive? or t9::alive? \
+      or t10::alive?
+      sleep 0.25
     end
   end
 end
