@@ -31,7 +31,7 @@ class Note
   end
 end
 
-class In_odd
+class Not_In_C
   include BohlenPierceJI
 
   # conveniences for scoring the 53 parts
@@ -160,33 +160,30 @@ class In_odd
 
   def player( channel )
     Thread.new {
-      playScore(channel, Volume.new(44, 84))
+      playScore(channel, Volume.new(20, 120))  # was Volume.new(44, 84)
     }
   end
 
   def perform( bpm)
     @tempo = Tempo.new( bpm)
-    @players = 12
+    @players = 13
     @done = 0
-    t0 = player(0)
-    t1 = player(1)
-    t2 = player(2)
-    t3 = player(3)
-    t4 = player(4)
-    t5 = player(5)
-    t6 = player(6)
-    t7 = player(7)
-    t8 = player(8)
-    t9 = player(9)
-    t10 = player(10)
-
-    playScore(11, Volume.new(48, 84))
-
-    while t0::alive? or t1::alive? or t2::alive? or t3::alive? or t4::alive? \
-      or t5::alive? or t6::alive? or t7::alive? or t8::alive? or t9::alive? \
-      or t10::alive?
-      sleep 0.25
-    end
+    # U-110 Patch P-12
+    player(0)    # 06-14 Clarinet 3
+    player(1)    # I-19 Bell 1
+    player(2)    # I-55 Choir 1
+    player(3)    # I-56 Choir 2
+    player(4)    # 03-07 Tsuzumi 1
+    player(5)    # 03-11 Gender 1
+    # D-110 Patch P-I12
+    player(6)    # ElecPiano4
+    player(7)    # Vibe
+    player(8)    # ElecOrgan1
+    player(9)    # Warm Bell
+    player(10)   # Pan Pipes
+    player(14)   # Rhythm
+    playScore(11, Volume.new(48, 84))  # Horn
+    sleep 1
   end
 
   def self.analyze
@@ -203,6 +200,5 @@ class In_odd
   end
 end
 
-# In_odd.analyze
-go = In_odd.new
+go = Not_In_C.new
 go.perform 97
