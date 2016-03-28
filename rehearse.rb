@@ -13,7 +13,7 @@ class Rehearse < MIDI
   include Drums110
 
   # Quarter note length in seconds
-  Q = 0.75 / 3.14159265359
+  Q = 1.0 / 3.14159265359
 
   def markovTime
     if brnd    then return Q
@@ -28,8 +28,9 @@ class Rehearse < MIDI
   Pitches3 = [G2, H2, A3, J2, A3, C3, A3]
   Pitches4 = [J2, H2, G2, F2, E2, D2, E2]
   Pitches5 = [J1, G2, A2, F2, A3, J2, C1]
+  Pitches6 = [J1, H2, A3, F2, F1, J2, A3]
 
-  XX = 16
+  XX = 32
 
   def play(pitches, vol, channel)
     XX.times do
@@ -47,44 +48,58 @@ class Rehearse < MIDI
         midiNote = AllDrums[rand(n)]
         playMidi(midiNote, vol.walk!, mt, channel, true)
       end
-      sleep mt
+      sleep Q # mt
     end
   end
 
-  def one
-    play(Pitches1, Volume.new(30,80), 0)
+  def one( channel )
+    play(Pitches1, Volume.new(20,120), channel)
   end
 
-  def two
-    play(Pitches2, Volume.new(30,80), 5)
+  def two( channel )
+    play(Pitches2, Volume.new(20,120), channel)
   end
 
-  def three
-    play(Pitches3, Volume.new(30,80), 2)
+  def three( channel )
+    play(Pitches3, Volume.new(20,120), channel)
   end
 
-  def four
-    play(Pitches4, Volume.new(30,60), 3)
+  def four( channel )
+    play(Pitches4, Volume.new(20,120), channel)
   end
 
-  def five
-    play(Pitches5, Volume.new(30,80), 4)
+  def five( channel )
+    play(Pitches5, Volume.new(20,120), channel)
   end
 
-  def six
-    drum(Volume.new(50,100), 1)
+  def six( channel )
+    play(Pitches6, Volume.new(20,120), channel)
+  end
+
+  def percussion( channel )
+    drum(Volume.new(50,100), channel)
   end
 
   def perform
-    t1 = Thread.new { one }
-    t2 = Thread.new { two }
-    t3 = Thread.new { three }
-    t4 = Thread.new { four }
-    t5 = Thread.new { five }
-    six
-    while t1.alive? or t2.alive? or t3.alive? or t4.alive? or t5.alive?
-      sleep mt
+    # U-110
+    Thread.new { one(0) }
+    Thread.new { two(1) }
+    Thread.new { three(2) }
+    Thread.new { four(3) }
+    Thread.new { five(4) }
+    Thread.new { six(5) }
+    # D-110
+    Thread.new { one(6) }
+    Thread.new { two(7) }
+    Thread.new { three(8) }
+    Thread.new { four(9) }
+    Thread.new { five(10) }
+    t = Thread.new { six(11) }
+    percussion( 14 ) # drums
+    while t.alive?
+       sleep Q
     end
+    sleep 1
   end
 end
 
