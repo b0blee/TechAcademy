@@ -5,11 +5,8 @@ require_relative 'pitch.rb'
 
 module EDO_19
   private
-    THIRD = 1200.0 / 19.0     # if 12EDO has half steps, think of 19EDO as third steps
-    A440 = 69                 # MIDI 69 is 440 Hz (A4)
-
     def self.nextHigher(pitch)
-      Pitch.new(pitch.midi, pitch.cents + THIRD)
+      Pitch.new( pitch.midi, pitch.cents + ( 1200.0 / 19.0 ) )
     end
 
     def self.octaveHigher(pitch)
@@ -19,7 +16,7 @@ module EDO_19
   public
     # The 19 tones are named C C# Db D D# Eb E E# F F# Gb G G# Ab A A# Bb B B#.
     # Note that there is no Fb and no Cb.
-    A0 = Pitch.new(A440 - 48) # A0 is 4 octaves below A440
+    A0 = Pitch.new(21)      # A0 is 4 octaves below A440
     As0 = nextHigher(A0)
     Bb0 = nextHigher(As0)
     B0 = nextHigher(Bb0)
@@ -88,19 +85,19 @@ module EDO_19
       C8
     ]
 
-    # scale offset patterns spanning one octave, for pulling Pitches from AllEdo19Notes
-    Major5 =      [ 0, 3, 6, 11, 14, 19 ]         # e.g. C D E G A C
-    Minor5 =      [ 0, 5, 8, 11, 16, 19 ]         # e.g. E G A B D E
-    Ionian7 =     [ 0, 3, 6, 8, 11, 14, 17, 19 ]      # I   - C D E F G A B C
-    Dorian7 =     [ 0, 3, 5, 8, 11, 14, 16, 19 ]      # ii  - D E F G A B C D
-    Phrygian7 =   [ 0, 2, 5, 8, 11, 13, 16, 19 ]      # iii - E F G A B C D E
-    Lydian7 =     [ 0, 3, 6, 9, 11, 14, 17, 19 ]      # IV  - F G A B C D E F
-    Mixolydian7 = [ 0, 3, 6, 8, 11, 14, 16, 19 ]      # V   - G A B C D E F G
-    Aeolian7 =    [ 0, 3, 5, 8, 11, 13, 16, 19 ]      # vi  - A B C D E F G A
-    Locrian7 =    [ 0, 2, 5, 8, 10, 13, 16, 19 ]      # vii - B C D E F G A B
-    Magic7 =      [ 0, 6, 7, 12, 13, 18, 19 ]             # e.g. C C# E E# G# Ab B# C
-    Magic10 =     [ 0, 5, 6, 7, 11, 12, 13, 14, 18, 19 ]  # e.g. C C# Eb E E# G G# Ab A B# C
-    Sensi8 =      [ 0, 2, 5, 7, 10, 12, 14, 17, 19]       # e.g. C Db Eb E# Gb G# A B C
+    # scale interval patterns spanning one octave, for pulling Pitches from AllEdo19Notes
+    Major5 =      [ 3, 3, 5, 3, 5 ]         # e.g. C D E G A C
+    Minor5 =      [ 5, 3, 3, 5, 3 ]         # e.g. E G A B D E
+    Ionian7 =     [ 3, 3, 2, 3, 3, 3, 2 ]      # I   - (C) D E F G A B C
+    Dorian7 =     [ 3, 2, 3, 3, 3 ,2, 3 ]      # ii  - (D) E F G A B C D
+    Phrygian7 =   [ 2, 3, 3, 3, 2, 3, 3 ]      # iii - (E) F G A B C D E
+    Lydian7 =     [ 3, 3, 3, 2, 3, 3, 2 ]      # IV  - (F) G A B C D E F
+    Mixolydian7 = [ 3, 3, 2, 3, 3, 2, 3 ]      # V   - (G) A B C D E F G
+    Aeolian7 =    [ 3, 2, 3, 3, 2, 3, 3 ]      # vi  - (A) B C D E F G A
+    Locrian7 =    [ 2, 3, 3, 2, 3, 3, 3 ]      # vii - (B) C D E F G A B
+    Magic7 =      [ 1, 5, 1, 5, 1, 5, 1 ]           # e.g. C C# E E# G# Ab B# C
+    Magic10 =     [ 1, 4, 1, 1, 4, 1, 1, 1, 4, 1 ]  # e.g. C C# Eb E E# G G# Ab A B# C
+    Sensi8 =      [ 2, 3, 2, 3, 2, 2, 3, 2 ]        # e.g. C Db Eb E# Gb G# A B C
 
     def self.getscale( start, pattern, octaves=3 )
       raise TypeError, "start must be a Pitch" if not start.is_a? Pitch
@@ -110,14 +107,12 @@ module EDO_19
       if ( index != nil )
         octaves.times do
           pattern.each do  |n|
-            if n > 0
-              scale.push( AllEdo19Notes[ index + n ] )
-            end
+            index += n
+            scale.push( AllEdo19Notes[ index ] )
           end
-          index += 19
         end
       end
       return scale
     end
-
+  # end public
 end
