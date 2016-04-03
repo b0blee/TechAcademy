@@ -87,4 +87,37 @@ module EDO_19
       C7, Cs7, Db7, D7, Ds7, Eb7, E7, Es7, F7, Fs7, Gb7, G7, Gs7, Ab7, A7, As7, Bb7, B7, Bs7,
       C8
     ]
+
+    # scale offset patterns spanning one octave, for pulling Pitches from AllEdo19Notes
+    Major5 =      [ 0, 3, 6, 11, 14, 19 ]         # e.g. C D E G A C
+    Minor5 =      [ 0, 5, 8, 11, 16, 19 ]         # e.g. E G A B D E
+    Ionian7 =     [ 0, 3, 6, 8, 11, 14, 17, 19 ]      # I   - C D E F G A B C
+    Dorian7 =     [ 0, 3, 5, 8, 11, 14, 16, 19 ]      # ii  - D E F G A B C D
+    Phrygian7 =   [ 0, 2, 5, 8, 11, 13, 16, 19 ]      # iii - E F G A B C D E
+    Lydian7 =     [ 0, 3, 6, 9, 11, 14, 17, 19 ]      # IV  - F G A B C D E F
+    Mixolydian7 = [ 0, 3, 6, 8, 11, 14, 16, 19 ]      # V   - G A B C D E F G
+    Aeolian7 =    [ 0, 3, 5, 8, 11, 13, 16, 19 ]      # vi  - A B C D E F G A
+    Locrian7 =    [ 0, 2, 5, 8, 10, 13, 16, 19 ]      # vii - B C D E F G A B
+    Magic7 =      [ 0, 6, 7, 12, 13, 18, 19 ]             # e.g. C C# E E# G# Ab B# C
+    Magic10 =     [ 0, 5, 6, 7, 11, 12, 13, 14, 18, 19 ]  # e.g. C C# Eb E E# G G# Ab A B# C
+    Sensi8 =      [ 0, 2, 5, 7, 10, 12, 14, 17, 19]       # e.g. C Db Eb E# Gb G# A B C
+
+    def self.getscale( start, pattern, octaves=3 )
+      raise TypeError, "start must be a Pitch" if not start.is_a? Pitch
+      raise TypeError, "pattern must be an Array" if not pattern.is_a? Array
+      scale = [ start ]
+      index = AllEdo19Notes.index(start)
+      if ( index != nil )
+        octaves.times do
+          pattern.each do  |n|
+            if n > 0
+              scale.push( AllEdo19Notes[ index + n ] )
+            end
+          end
+          index += 19
+        end
+      end
+      return scale
+    end
+
 end
